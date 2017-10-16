@@ -8,7 +8,7 @@ const config = require('config');
 const {send:_send} = require('./functions/mail.js');
 const {print:_print} = require('./functions/print.js');
 
-exports.print = function(event, context, callback) {
+exports.send = function(event, context, callback) {
   const {mail, url} = JSON.parse(event.toString());
   const {requestId} = context;
 
