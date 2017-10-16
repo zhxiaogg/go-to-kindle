@@ -9,6 +9,7 @@
   "author": "zhxiaog@outlook.com",
   "license": "ISC",
   "dependencies": {
+    "config": "^1.26.2",
     "nodemailer": "^4.2.0",
     "puppeteer": "^0.12.0"
   }

@@ -1,0 +1,9 @@
+{
+  "mail": {
+    "host": "smtpdm.aliyun.com",
+    "user": "noreply@mail.com",
+    "password": "PasSWORd"
+  },
+  "outputs": "/tmp/pdf",
+  "executablePath": ""
+}

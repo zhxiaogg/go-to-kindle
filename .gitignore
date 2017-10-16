@@ -1,3 +1,5 @@
 node_modules/
 test.js
 test.zip
+config/dev.json
+config/prod.json
