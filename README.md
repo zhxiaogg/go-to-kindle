@@ -23,9 +23,9 @@ convert a url to pdf and send it to your mailbox(eg. kindle), runs on aliyun fun
 
   run following scripts:
   ```shell
-  >cd send-to-kindle
-  >npm install
-  >fcli shell
-  >mks send-to-kindle -d "send to kindle functions"
-  >>mkf send-to-kindle/send -h index.send --runtime nodejs6 -d ./
+  ➜cd send-to-kindle
+  ➜npm install
+  ➜fcli shell
+  >>>mks send-to-kindle -d "send to kindle functions"
+  >>>mkf send-to-kindle/send -h index.send --runtime nodejs6 -d ./
   ```
