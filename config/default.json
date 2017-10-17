@@ -2,7 +2,9 @@
   "mail": {
     "host": "smtpdm.aliyun.com",
     "user": "noreply@mail.com",
-    "password": "PasSWORd"
+    "password": "PasSWORd",
+    "port": 465,
+    "secure": true
   },
   "outputs": "/tmp/pdf",
   "executablePath": ""

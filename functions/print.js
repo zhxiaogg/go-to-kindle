@@ -20,6 +20,8 @@ process.env.LD_LIBRARY_PATH =  `${CODE_PATH}node_modules/nss/lib/`;
  *
  **/
 module.exports.print = function({url, requestId}) {
+  console.log(`print pdf for: ${url}`);
+
   return puppeteer.launch({
     headless: true,
     args: ['--no-sandbox', '--disable-setuid-sandbox'],
@@ -45,18 +47,21 @@ function create_pdf(browser, url, requestId) {
         }
       })
   }).then((buffer) => {
+    console.log(`printing succeeded: ${path}`);
     browser.close();
     return path;
   }).catch((e) => {
+    console.log(`printing failed: ${e}`);
     browser.close();
     throw e;
   });
 }
 
 function get_headless() {
-  if(executablePath) {
-    return executablePath;
-  } else {
-    return `${CODE_PATH}node_modules/headless-chrome/headless_shell`;
+  let exec = executablePath;
+  if(!exec) {
+    exec = `${CODE_PATH}node_modules/headless-chrome/headless_shell`;
   }
+  console.log(`executablePath: ${exec}`);
+  return exec;
 }

@@ -1,16 +1,22 @@
 const nodemailer = require('nodemailer');
 const config = require('config');
 
-const {host, user, password} = config.get('mail');
+const {host, port, secure, user, password} = config.get('mail');
 
 const mailer = nodemailer.createTransport({
   host: host,
-  port: 25,
-  secureConnection: true,
+  port: port,
+  secureConnection: secure,
   auth: {
      user: user,
      pass: password
-  }
+  },
+  connectionTimeout: 50000,
+  greetingTimeout: 50000,
+  debug: false,
+  logger: true
+},{
+  from: `gotokindle<${user}>`
 });
 
 /**
@@ -24,8 +30,8 @@ const mailer = nodemailer.createTransport({
  *
  **/
 module.exports.send = function({mail, pdf}) {
+  console.log(`sending pdf to: ${mail}`);
   const options = {
-      from: `gotokindle<${user}>`,
       to: mail,
       subject: 'your sendtokindle service',
       text: 'Best Regards!',
@@ -41,8 +47,10 @@ module.exports.send = function({mail, pdf}) {
   const result = new Promise((resolve, reject) => {
     mailer.sendMail(options, (error, info) => {
       if(error) {
+        console.log(`sending mail failed: ${error}`);
         reject(error);
       } else {
+        console.log('sending succeeded');
         resolve(info);
       }
     });
