@@ -5,7 +5,7 @@ const config = require('config');
 
 const CODE_PATH = process.env['FC_FUNC_CODE_PATH'];
 
-const {outputs, executablePath} = config;
+const {outputs, executablePath, server} = config;
 
 fs.mkdir(outputs, (err) => {});
 
@@ -22,42 +22,80 @@ process.env.LD_LIBRARY_PATH =  `${CODE_PATH}node_modules/nss/lib/`;
 module.exports.print = function({url, requestId}) {
   console.log(`print pdf for: ${url}`);
 
+  const output_pdf = `${outputs}${requestId}.pdf`;
+
   return puppeteer.launch({
     headless: true,
     args: ['--no-sandbox', '--disable-setuid-sandbox'],
-    executablePath: get_headless()
+    executablePath: get_headless_executable()
   }).then(browser => {
-    return create_pdf(browser, url, requestId);
+    return open_page(browser, url).then((page) => {
+      return try_extract_article(page).then(article => {
+        if(article && article.content) {
+          // print pretty page
+          return page.close().then(() => {
+            return create_pdf_using_readability(browser, article, output_pdf)
+          }).then((pdf_buffer) => {return {path: output_pdf, name: to_file_name(article.title) || requestId};});
+        } else {
+          // print current page
+          return create_pdf(page, output_pdf).then((pdf_buffer) => {return {path: output_pdf, name: requestId};});
+        }
+      });
+    }).catch(e => {
+      console.log(`error: ${e}`);
+      return browser.close().then(() => {throw e;});
+    }).then((output_info) => {
+      console.log(output_info);
+      console.log('close brwoser.');
+      return browser.close().then(() => output_info);
+    });
   });
 };
 
-/**
- * this function tries to create a pdf, and close the browser at last.
- **/
-function create_pdf(browser, url, requestId) {
-  const path = `${outputs}/${requestId}.pdf`;
+function to_file_name(title) {
+  return `${title}.pdf`;
+}
 
-  return browser.newPage().then(page => {
-    return page.goto(url)
-      .then((response) => {
-        if(response.ok) {
-          return page.pdf({path: path,printBackground: false});
-        } else {
-          throw new Error(`response status: ${response.status}`);
-        }
-      })
-  }).then((buffer) => {
-    console.log(`printing succeeded: ${path}`);
-    browser.close();
-    return path;
-  }).catch((e) => {
-    console.log(`printing failed: ${e}`);
-    browser.close();
-    throw e;
+
+function try_extract_article(page) {
+  return Promise.all([
+    page.addScriptTag({path: `${CODE_PATH}readability/Readability.js`}),
+    page.addScriptTag({path: `${CODE_PATH}readability/prettify.js`})
+  ]).then(() => {
+    return page.evaluate(() => prettify())
   });
 }
 
-function get_headless() {
+function create_pdf(page, pdf, pdf_options) {
+  let options = {path: pdf, printBackground: false};
+  if(pdf_options) {
+    Object.assign(options, pdf_options);
+  }
+  return page.emulateMedia('print').then(() => page.pdf(options));
+}
+
+function open_page(browser, url) {
+  return browser.newPage().then(page => {
+    return page.goto(url).then(response => {
+      if(response.ok) {
+        return page;
+      } else {
+        throw new Error(`response status: ${response.status}`);
+      }
+    });
+  })
+}
+
+function create_pdf_using_readability(browser, article, pdf) {
+  const url = `${server}readability/pretty.html`;
+  return open_page(browser, url).then(page => {
+    return page.evaluate((article) => prettify(article), article).then(() => {
+      return create_pdf(page, pdf, {margin: {top: 90, bottom: 90, left: 90, right: 90}});
+    });
+  });
+}
+
+function get_headless_executable() {
   let exec = executablePath;
   if(!exec) {
     exec = `${CODE_PATH}node_modules/headless-chrome/headless_shell`;

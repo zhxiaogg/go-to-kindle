@@ -29,18 +29,17 @@ const mailer = nodemailer.createTransport({
  * @return promise
  *
  **/
-module.exports.send = function({mail, pdf}) {
-  console.log(`sending pdf to: ${mail}`);
+module.exports.send = function({mail, pdf, name}) {
+  console.log(`sending ${name} to: ${mail}`);
   const options = {
       to: mail,
-      subject: 'your sendtokindle service',
+      subject: name,
       text: 'Best Regards!',
-      // html: '',
       attachments: [
-          {
-              filename: pdf,
-              path: pdf
-          }
+        {
+          filename: name,
+          path: pdf
+        }
       ],
   };
 

@@ -6,6 +6,7 @@
     "port": 465,
     "secure": true
   },
-  "outputs": "/tmp/pdf",
-  "executablePath": ""
+  "outputs": "/tmp/pdf/",
+  "executablePath": "",
+  "server": "http://localhost:8001/"
 }
