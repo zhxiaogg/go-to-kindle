@@ -35,10 +35,10 @@ module.exports.print = function({url, requestId}) {
           // print pretty page
           return page.close().then(() => {
             return create_pdf_using_readability(browser, article, output_pdf)
-          }).then((pdf_buffer) => {return {path: output_pdf, name: to_file_name(article.title) || requestId};});
+          }).then((pdf_buffer) => {return {path: output_pdf, name: to_file_name(article.title || requestId)};});
         } else {
           // print current page
-          return create_pdf(page, output_pdf).then((pdf_buffer) => {return {path: output_pdf, name: requestId};});
+          return create_pdf(page, output_pdf).then((pdf_buffer) => {return {path: output_pdf, name: to_file_name(requestId)};});
         }
       });
     }).catch(e => {
